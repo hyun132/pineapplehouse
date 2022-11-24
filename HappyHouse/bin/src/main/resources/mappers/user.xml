@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" 
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.happyhouse.model.mapper.UserMapper">
+
+	<select id="login" parameterType="userDto" resultType="userDto">
+		select username, userid, email
+		from user
+		where userid = #{userid} and userpwd = #{userpwd}
+	</select>
+	
+	<select id="userInfo" parameterType="String" resultType="userDto">
+		select username, userid, email, joindate, isadmin
+		from user
+		where userid = #{userid}
+	</select>
+
+	<insert id="joinUser" parameterType="userDto">
+		insert into user (username, userid, userpwd, email, joindate)
+		values (#{username}, #{userid}, #{userpwd}, #{email}, now())
+	</insert>
+
+	<select id="listUser" parameterType="map" resultType="userDto">
+		select username, userid, userpwd, email, joindate, isadmin
+		from user
+		<where>
+			<include refid="search"></include>
+		</where>
+		order by joindate desc
+		limit #{start}, #{spp}
+	</select>
+	
+	<select id="getTodayUser" resultType="string">
+		select joindate
+		from user
+		where date_format(joindate, '%Y%m%d') = date_format(now(), '%Y%m%d')
+	</select>
+	
+	<select id="findPassword" parameterType="map" resultType="int">
+		select count(userid)
+		from user
+		where userid = #{userid} and email = #{email} and username = #{username}
+	</select>
+
+
+	<select id="getUser" parameterType="string" resultType="userDto">
+		select username, userid, userpwd, email, joindate, isadmin
+		from user
+		where userid = #{userid}
+	</select>
+	
+	<update id="resetPassword" parameterType="userDto">
+		update user
+		set userpwd = #{userpwd}
+		where userid = #{userid}
+	</update>
+
+	<update id="updateUser" parameterType="userDto">
+		update user
+		<trim prefix="set" suffixOverrides=",">
+			<if test="userpwd != null">userpwd = #{userpwd},</if>
+			<if test="email != null">email = #{email},</if>
+			<if test="isadmin != null">isadmin = #{isadmin},</if>
+		</trim>
+		where userid = #{userid}
+	</update>
+
+	<delete id="deleteUser" parameterType="String">
+		delete from user
+		where userid = #{userId}
+	</delete>
+
+	<sql id="search">
+		<if test="word != null and word != ''">
+			<if test="key == 'userid'">
+				and userid like concat('%', #{word}, '%')
+			</if>
+			<if test="key != 'userid'">
+				and username like concat('%', #{word}, '%')
+			</if>
+		</if>
+	</sql>
+
+	<select id="getCnt" parameterType="map" resultType="int">
+		select count(userid)
+		from user
+		<where>
+			<include refid="search"></include>
+		</where>
+	</select>
+	
+	<select id="idCheck" parameterType="String" resultType="int">
+		select count(userid)
+		from user
+		where userid = #{userid}
+	</select>
+	
+	<select id="getRefreshToken" parameterType="string" resultType="string">
+		select token
+		from user
+		where userid = #{userid}
+	</select>
+	
+	<update id="saveRefreshToken" parameterType="map">
+		update user
+		set token = #{token}
+		where userid = #{userid}
+	</update>
+	
+	<update id="deleteRefreshToken" parameterType="map">
+		update user
+		set token = #{token, jdbcType=VARCHAR}
+		where userid = #{userid}
+	</update>
+
+</mapper>

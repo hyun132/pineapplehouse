@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+	"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.happyhouse.model.mapper.FavoriteMapper">
+	
+	<!-- userid에 해당하는 댓글 조회 -->
+	<select id="listFavorite" parameterType="string" resultType="FavoriteDto">
+		select f.id, f.dongCode, f.aptCode, f.userid, d.dongName 
+		from favorite f join dongcode d on f.dongCode = d.dongCode
+		where userid = #{userid};
+	</select>
+
+	<insert id="insertFavorite" parameterType="FavoriteDto">
+		<selectKey keyProperty="id" resultType="int" order="BEFORE">
+			select max(id)+1 from favorite
+   		</selectKey>
+		
+		insert into favorite (dongCode, aptCode, userid)
+		values (#{dongCode}, #{aptCode}, #{userid})
+	</insert>
+	
+	<delete id="deleteFavorite" parameterType="string">
+		delete from favorite
+		where id = #{id}
+	</delete>
+
+</mapper>

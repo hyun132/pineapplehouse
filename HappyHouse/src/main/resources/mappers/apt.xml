@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.ssafy.happyhouse.model.mapper.HouseMapMapper">
+
+    <select id="getSido" resultType="sidoGugunCodeDto">
+        select left (sidoCode, 2) regionCode, sidoName as regionName
+        from sidocode
+        order by regionCode
+    </select>
+
+    <select id="getGugunInSido" parameterType="string" resultType="sidoGugunCodeDto">
+        select left (gugunCode, 5) regionCode, gugunName as regionName
+        from guguncode
+        where left (gugunCode, 2) like #{sido}
+        order by regionCode
+    </select>
+
+    <select id="getDongInGugun" parameterType="string" resultType="sidoGugunCodeDto">
+        select distinct dongCode as regionCode, dongName as regionName
+        from dongcode
+        where left (dongCode, 5) like #{gugun}
+        order by regionCode
+    </select>
+
+    <select id="getAptInDong" parameterType="string" resultType="houseDetailDto">
+		select *
+        from houseinfo
+        where dongCode like #{dong} and dealPrice!=""
+        order by aptName 
+        limit 30
+    </select>
+    
+        <select id="getApt" parameterType="string" resultType="houseDetailDto">
+		select *
+        from houseinfo
+        where dongCode like #{dong} and aptCode like #{aptCode}
+        limit 1
+    </select>
+    
+
+    <select id="getAptDetail" parameterType="string" resultType="houseDetailPriceDto">
+        select *
+        from housedealprice
+        where aptCode like #{aptCode} limit 1 
+    </select>
+
+    <select id="getAptPriceChartData" parameterType="string" resultType="houseChartDataDto">
+        select b.*
+from (
+	select  aptCode,marketPrice, max(upperMarketPrice) as upperMarketPrice, min(lowerMarketPrice) as lowerMarketPrice, ChartBasisDate
+	from chartdatas
+	where aptCode like #{aptCode}
+	group by marketPrice
+) as b
+group by left(marketPrice,4)
+    </select>
+    
+
+</mapper>
